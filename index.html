@@ -1,23 +1,26 @@
 ---
-layout: default
 ---
+<!DOCTYPE html>
+<html>
 
-<div class="home">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <h1 class="page-heading">Posts</h1>
+		<title>{{ site.title | escape }}</title>
+		<meta name="description" content="{{ site.description | escape }}">
 
-  <ul class="post-list">
-    {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+		<link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
 
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-      </li>
-    {% endfor %}
-  </ul>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/codemirror.min.css">
+		<link rel="stylesheet" href="{{ "/css/editor.css" | prepend: site.baseurl }}">
+	</head>
 
-  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+  <body>
+    <div id="root"></div>
 
-</div>
+    <script src="{{ '/js/editor.js' | prepend: site.baseurl }}"></script>
+  </body>
+
+</html>

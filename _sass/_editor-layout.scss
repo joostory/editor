@@ -1,0 +1,37 @@
+.header {
+	position:absolute;
+	top:0;
+	left:0;
+	right:0;
+	height:$header-height;
+	background:#333;
+
+	& .title {
+		color: #eee;
+		font-weight: bold;
+		line-height: 40px;
+		padding: 5px 20px;
+	}
+}
+
+.sidebar {
+	position:absolute;
+	top:$header-height;
+	bottom:0;
+	left:0;
+	width:$sidebar-width;
+	background:#162228;
+}
+
+.editor {
+	position:absolute;
+	left:$sidebar-width;
+	right:0;
+	top:$header-height;
+	bottom:0;
+
+	& .ReactCodeMirror,
+	& .CodeMirror {
+		height: 100%
+	}
+}
