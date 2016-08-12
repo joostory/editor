@@ -65,11 +65,11 @@
 
 	var _App2 = _interopRequireDefault(_App);
 
-	var _configureStore = __webpack_require__(213);
+	var _configureStore = __webpack_require__(216);
 
 	var _configureStore2 = _interopRequireDefault(_configureStore);
 
-	var _actions = __webpack_require__(218);
+	var _actions = __webpack_require__(201);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23056,17 +23056,17 @@
 
 	var _reactRedux = __webpack_require__(176);
 
-	var _actions = __webpack_require__(218);
+	var _actions = __webpack_require__(201);
 
-	var _Header = __webpack_require__(201);
+	var _Header = __webpack_require__(204);
 
 	var _Header2 = _interopRequireDefault(_Header);
 
-	var _Sidebar = __webpack_require__(202);
+	var _Sidebar = __webpack_require__(205);
 
 	var _Sidebar2 = _interopRequireDefault(_Sidebar);
 
-	var _Editor = __webpack_require__(205);
+	var _Editor = __webpack_require__(208);
 
 	var _Editor2 = _interopRequireDefault(_Editor);
 
@@ -23198,6 +23198,165 @@
 /* 201 */
 /***/ function(module, exports, __webpack_require__) {
 
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.receiveLocalPost = receiveLocalPost;
+	exports.receiveLocalPosts = receiveLocalPosts;
+	exports.fetchLocalPosts = fetchLocalPosts;
+
+	var _ActionTypes = __webpack_require__(202);
+
+	var types = _interopRequireWildcard(_ActionTypes);
+
+	var _database = __webpack_require__(203);
+
+	var _database2 = _interopRequireDefault(_database);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function receiveLocalPost(post) {
+		return { type: types.RECEIVE_LOCAL_POST, post: post };
+	}
+
+	function receiveLocalPosts(posts) {
+		return { type: types.RECEIVE_LOCAL_POSTS, posts: posts };
+	}
+
+	function fetchLocalPosts() {
+		return function (dispatch) {
+			_database2.default.getInstance().getPosts(function (posts) {
+				return dispatch(receiveLocalPosts(posts));
+			});
+		};
+	}
+
+/***/ },
+/* 202 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var RECEIVE_LOCAL_POSTS = exports.RECEIVE_LOCAL_POSTS = "RECEIVE_LOCAL_POSTS";
+	var RECEIVE_LOCAL_POST = exports.RECEIVE_LOCAL_POST = "RECEIVE_LOCAL_POST";
+
+/***/ },
+/* 203 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Database = function () {
+		function Database() {
+			_classCallCheck(this, Database);
+
+			this.getDB(function (db) {});
+		}
+
+		_createClass(Database, [{
+			key: "getDB",
+			value: function getDB(action) {
+				var _this = this;
+
+				if (this.db) {
+					action(this.db);
+				} else {
+					var request = indexedDB.open("LocalPosts");
+					request.onerror = function (e) {
+						console.log("ERROR!", e);
+					};
+					request.onsuccess = function (e) {
+						_this.db = request.result;
+						action(_this.db);
+					};
+					request.onupgradeneeded = function (e) {
+						var db = e.target.result;
+						var objectStore = db.createObjectStore("posts", { keyPath: "id" });
+						objectStore.createIndex("date", "date", { unique: false });
+					};
+				}
+			}
+		}, {
+			key: "getPosts",
+			value: function getPosts(callback) {
+				this.getDB(function (db) {
+					db.transaction(["posts"]).objectStore("posts").getAll().onsuccess = function (e) {
+						callback(e.target.result);
+					};
+				});
+			}
+		}, {
+			key: "newPost",
+			value: function newPost(id, callback) {
+				var post = {
+					id: id,
+					title: "NEW POST",
+					date: new Date(),
+					content: "# NEW POST"
+				};
+
+				this.getDB(function (db) {
+					var transaction = db.transaction(["posts"], "readwrite");
+					transaction.onerror = function (e) {
+						console.log("ERROR!", e);
+					};
+					transaction.objectStore("posts").add(post).onsuccess = function (e) {
+						callback(post);
+					};
+				});
+			}
+		}, {
+			key: "updatePost",
+			value: function updatePost(post, callback) {
+				this.getDB(function (db) {
+					db.transaction(["posts"], "readwrite").objectStore("posts").put(post).onsuccess = function (e) {
+						callback(e.target.result);
+					};
+				});
+			}
+		}, {
+			key: "removePost",
+			value: function removePost(id, callback) {
+				this.getDB(function (db) {
+					db.transaction(["posts"], "readwrite").objectStore("posts").delete(id).onsuccess = function (e) {
+						callback();
+					};
+				});
+			}
+		}], [{
+			key: "getInstance",
+			value: function getInstance() {
+				if (!Database.instance) {
+					Database.instance = new Database();
+				}
+				return Database.instance;
+			}
+		}]);
+
+		return Database;
+	}();
+
+	exports.default = Database;
+
+/***/ },
+/* 204 */
+/***/ function(module, exports, __webpack_require__) {
+
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
@@ -23248,7 +23407,7 @@
 	exports.default = Header;
 
 /***/ },
-/* 202 */
+/* 205 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -23263,7 +23422,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _LocalPostList = __webpack_require__(203);
+	var _LocalPostList = __webpack_require__(206);
 
 	var _LocalPostList2 = _interopRequireDefault(_LocalPostList);
 
@@ -23315,7 +23474,7 @@
 	exports.default = Sidebar;
 
 /***/ },
-/* 203 */
+/* 206 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -23330,11 +23489,15 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _dateformat = __webpack_require__(204);
+	var _classnames = __webpack_require__(200);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var _dateformat = __webpack_require__(207);
 
 	var _dateformat2 = _interopRequireDefault(_dateformat);
 
-	var _database = __webpack_require__(219);
+	var _database = __webpack_require__(203);
 
 	var _database2 = _interopRequireDefault(_database);
 
@@ -23352,10 +23515,23 @@
 		function LocalPostList(props, context) {
 			_classCallCheck(this, LocalPostList);
 
-			return _possibleConstructorReturn(this, Object.getPrototypeOf(LocalPostList).call(this, props, context));
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LocalPostList).call(this, props, context));
+
+			_this.state = {
+				selectedId: 0
+			};
+			return _this;
 		}
 
 		_createClass(LocalPostList, [{
+			key: 'handleSelect',
+			value: function handleSelect(id) {
+				var onSelect = this.props.onSelect;
+
+				onSelect(id);
+				this.setState({ selectedId: id });
+			}
+		}, {
 			key: 'handleAdd',
 			value: function handleAdd() {
 				var _props = this.props;
@@ -23366,20 +23542,30 @@
 				_database2.default.getInstance().newPost(id, function (post) {
 					return onAdd(post);
 				});
+				this.setState({ selectedId: id });
 			}
 		}, {
 			key: 'render',
 			value: function render() {
+				var _this2 = this;
+
 				var posts = this.props.posts;
+				var selectedId = this.state.selectedId;
 
 
 				var list = posts.map(function (item, i) {
+					var className = (0, _classnames2.default)({
+						"item": true,
+						"selected": item.id == selectedId
+					});
 					return _react2.default.createElement(
 						'li',
 						{ key: item.id },
 						_react2.default.createElement(
 							'a',
-							{ className: 'item' },
+							{ className: className, onClick: function onClick(e) {
+									return _this2.handleSelect(item.id);
+								} },
 							_react2.default.createElement(
 								'span',
 								{ className: 'item_title' },
@@ -23393,7 +23579,7 @@
 							_react2.default.createElement(
 								'span',
 								{ className: 'item_content' },
-								item.content
+								item.content.substring(0, 30)
 							)
 						)
 					);
@@ -23428,7 +23614,7 @@
 	exports.default = LocalPostList;
 
 /***/ },
-/* 204 */
+/* 207 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -23660,7 +23846,7 @@
 
 
 /***/ },
-/* 205 */
+/* 208 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -23675,15 +23861,15 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _reactCodemirror = __webpack_require__(206);
+	var _reactCodemirror = __webpack_require__(209);
 
 	var _reactCodemirror2 = _interopRequireDefault(_reactCodemirror);
 
-	__webpack_require__(209);
+	__webpack_require__(212);
 
-	__webpack_require__(210);
+	__webpack_require__(213);
 
-	__webpack_require__(211);
+	__webpack_require__(214);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -23743,14 +23929,14 @@
 	exports.default = Editor;
 
 /***/ },
-/* 206 */
+/* 209 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var React = __webpack_require__(2);
 	var className = __webpack_require__(200);
-	var debounce = __webpack_require__(207);
+	var debounce = __webpack_require__(210);
 
 	var CodeMirror = React.createClass({
 		displayName: 'CodeMirror',
@@ -23765,7 +23951,7 @@
 			codeMirrorInstance: React.PropTypes.object
 		},
 		getCodeMirrorInstance: function getCodeMirrorInstance() {
-			return this.props.codeMirrorInstance || __webpack_require__(208);
+			return this.props.codeMirrorInstance || __webpack_require__(211);
 		},
 		getInitialState: function getInitialState() {
 			return {
@@ -23831,7 +24017,7 @@
 	module.exports = CodeMirror;
 
 /***/ },
-/* 207 */
+/* 210 */
 /***/ function(module, exports) {
 
 	/**
@@ -24228,7 +24414,7 @@
 
 
 /***/ },
-/* 208 */
+/* 211 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -33169,7 +33355,7 @@
 
 
 /***/ },
-/* 209 */
+/* 212 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -33179,7 +33365,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(208));
+	    mod(__webpack_require__(211));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror"], mod);
 	  else // Plain browser env
@@ -33918,7 +34104,7 @@
 
 
 /***/ },
-/* 210 */
+/* 213 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -33926,7 +34112,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(208));
+	    mod(__webpack_require__(211));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror"], mod);
 	  else // Plain browser env
@@ -34318,7 +34504,7 @@
 
 
 /***/ },
-/* 211 */
+/* 214 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -34326,7 +34512,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(208), __webpack_require__(210), __webpack_require__(212));
+	    mod(__webpack_require__(211), __webpack_require__(213), __webpack_require__(215));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../../lib/codemirror", "../xml/xml", "../meta"], mod);
 	  else // Plain browser env
@@ -35143,7 +35329,7 @@
 
 
 /***/ },
-/* 212 */
+/* 215 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// CodeMirror, copyright (c) by Marijn Haverbeke and others
@@ -35151,7 +35337,7 @@
 
 	(function(mod) {
 	  if (true) // CommonJS
-	    mod(__webpack_require__(208));
+	    mod(__webpack_require__(211));
 	  else if (typeof define == "function" && define.amd) // AMD
 	    define(["../lib/codemirror"], mod);
 	  else // Plain browser env
@@ -35357,7 +35543,7 @@
 
 
 /***/ },
-/* 213 */
+/* 216 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -35369,15 +35555,15 @@
 
 	var _redux = __webpack_require__(183);
 
-	var _reduxThunk = __webpack_require__(214);
+	var _reduxThunk = __webpack_require__(217);
 
 	var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
 
-	var _reduxLogger = __webpack_require__(215);
+	var _reduxLogger = __webpack_require__(218);
 
 	var _reduxLogger2 = _interopRequireDefault(_reduxLogger);
 
-	var _reducers = __webpack_require__(216);
+	var _reducers = __webpack_require__(219);
 
 	var _reducers2 = _interopRequireDefault(_reducers);
 
@@ -35389,7 +35575,7 @@
 	}
 
 /***/ },
-/* 214 */
+/* 217 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -35417,7 +35603,7 @@
 	exports['default'] = thunk;
 
 /***/ },
-/* 215 */
+/* 218 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -35650,7 +35836,7 @@
 	module.exports = createLogger;
 
 /***/ },
-/* 216 */
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -35659,7 +35845,7 @@
 		value: true
 	});
 
-	var _ActionTypes = __webpack_require__(217);
+	var _ActionTypes = __webpack_require__(202);
 
 	var types = _interopRequireWildcard(_ActionTypes);
 
@@ -35699,165 +35885,6 @@
 	exports.default = (0, _redux.combineReducers)({
 		currentPost: currentPost, posts: posts
 	});
-
-/***/ },
-/* 217 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	var RECEIVE_LOCAL_POSTS = exports.RECEIVE_LOCAL_POSTS = "RECEIVE_LOCAL_POSTS";
-	var RECEIVE_LOCAL_POST = exports.RECEIVE_LOCAL_POST = "RECEIVE_LOCAL_POST";
-
-/***/ },
-/* 218 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.receiveLocalPost = receiveLocalPost;
-	exports.receiveLocalPosts = receiveLocalPosts;
-	exports.fetchLocalPosts = fetchLocalPosts;
-
-	var _ActionTypes = __webpack_require__(217);
-
-	var types = _interopRequireWildcard(_ActionTypes);
-
-	var _database = __webpack_require__(219);
-
-	var _database2 = _interopRequireDefault(_database);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-	function receiveLocalPost(post) {
-		return { type: types.RECEIVE_LOCAL_POST, post: post };
-	}
-
-	function receiveLocalPosts(posts) {
-		return { type: types.RECEIVE_LOCAL_POSTS, posts: posts };
-	}
-
-	function fetchLocalPosts() {
-		return function (dispatch) {
-			_database2.default.getInstance().getPosts(function (posts) {
-				return dispatch(receiveLocalPosts(posts));
-			});
-		};
-	}
-
-/***/ },
-/* 219 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var Database = function () {
-		function Database() {
-			_classCallCheck(this, Database);
-
-			this.getDB(function (db) {});
-		}
-
-		_createClass(Database, [{
-			key: "getDB",
-			value: function getDB(action) {
-				var _this = this;
-
-				if (this.db) {
-					action(this.db);
-				} else {
-					var request = indexedDB.open("LocalPosts");
-					request.onerror = function (e) {
-						console.log("ERROR!", e);
-					};
-					request.onsuccess = function (e) {
-						_this.db = request.result;
-						action(_this.db);
-					};
-					request.onupgradeneeded = function (e) {
-						var db = e.target.result;
-						var objectStore = db.createObjectStore("posts", { keyPath: "id" });
-						objectStore.createIndex("date", "date", { unique: false });
-					};
-				}
-			}
-		}, {
-			key: "getPosts",
-			value: function getPosts(callback) {
-				this.getDB(function (db) {
-					db.transaction(["posts"]).objectStore("posts").getAll().onsuccess = function (e) {
-						callback(e.target.result);
-					};
-				});
-			}
-		}, {
-			key: "newPost",
-			value: function newPost(id, callback) {
-				var post = {
-					id: id,
-					title: "NEW POST",
-					date: new Date(),
-					content: "# NEW POST"
-				};
-
-				this.getDB(function (db) {
-					var transaction = db.transaction(["posts"], "readwrite");
-					transaction.onerror = function (e) {
-						console.log("ERROR!", e);
-					};
-					transaction.objectStore("posts").add(post).onsuccess = function (e) {
-						callback(post);
-					};
-				});
-			}
-		}, {
-			key: "updatePost",
-			value: function updatePost(post, callback) {
-				this.getDB(function (db) {
-					db.transaction(["posts"], "readwrite").objectStore("posts").put(post).onsuccess = function (e) {
-						callback(e.target.result);
-					};
-				});
-			}
-		}, {
-			key: "removePost",
-			value: function removePost(id, callback) {
-				this.getDB(function (db) {
-					db.transaction(["posts"], "readwrite").objectStore("posts").delete(id).onsuccess = function (e) {
-						callback();
-					};
-				});
-			}
-		}], [{
-			key: "getInstance",
-			value: function getInstance() {
-				if (!Database.instance) {
-					Database.instance = new Database();
-				}
-				return Database.instance;
-			}
-		}]);
-
-		return Database;
-	}();
-
-	exports.default = Database;
 
 /***/ }
 /******/ ]);
