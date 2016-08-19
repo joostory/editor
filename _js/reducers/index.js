@@ -8,6 +8,8 @@ const initialState = {
 
 function currentPost(state = initialState.currentPost, action) {
 	switch (action.type) {
+		case types.RECEIVE_CURRENT_POST:
+			return action.post
 		default:
 			return state
 	}

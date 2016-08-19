@@ -23089,7 +23089,18 @@
 
 		_createClass(App, [{
 			key: 'handleSelect',
-			value: function handleSelect() {}
+			value: function handleSelect(id) {
+				var _props = this.props;
+				var dispatch = _props.dispatch;
+				var posts = _props.posts;
+
+				var filterdPosts = posts.filter(function (item, index) {
+					return item.id == id;
+				});
+				if (filterdPosts.length > 0) {
+					dispatch((0, _actions.receiveCurrentPost)(filterdPosts[0]));
+				}
+			}
 		}, {
 			key: 'handleAdd',
 			value: function handleAdd(post) {
@@ -23100,9 +23111,9 @@
 		}, {
 			key: 'render',
 			value: function render() {
-				var _props = this.props;
-				var currentPost = _props.currentPost;
-				var posts = _props.posts;
+				var _props2 = this.props;
+				var currentPost = _props2.currentPost;
+				var posts = _props2.posts;
 
 
 				return _react2.default.createElement(
@@ -23112,7 +23123,7 @@
 					_react2.default.createElement(_Sidebar2.default, { posts: posts,
 						onSelect: this.handleSelect.bind(this),
 						onAdd: this.handleAdd.bind(this) }),
-					_react2.default.createElement(_Editor2.default, { currentPost: currentPost })
+					_react2.default.createElement(_Editor2.default, { post: currentPost })
 				);
 			}
 		}]);
@@ -23203,6 +23214,7 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
+	exports.receiveCurrentPost = receiveCurrentPost;
 	exports.receiveLocalPost = receiveLocalPost;
 	exports.receiveLocalPosts = receiveLocalPosts;
 	exports.fetchLocalPosts = fetchLocalPosts;
@@ -23218,6 +23230,10 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	function receiveCurrentPost(post) {
+		return { type: types.RECEIVE_CURRENT_POST, post: post };
+	}
 
 	function receiveLocalPost(post) {
 		return { type: types.RECEIVE_LOCAL_POST, post: post };
@@ -23244,6 +23260,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	var RECEIVE_CURRENT_POST = exports.RECEIVE_CURRENT_POST = "RECEIVE_CURRENT_POST";
 	var RECEIVE_LOCAL_POSTS = exports.RECEIVE_LOCAL_POSTS = "RECEIVE_LOCAL_POSTS";
 	var RECEIVE_LOCAL_POST = exports.RECEIVE_LOCAL_POST = "RECEIVE_LOCAL_POST";
 
@@ -23894,6 +23911,13 @@
 		}
 
 		_createClass(Editor, [{
+			key: 'componentWillReceiveProps',
+			value: function componentWillReceiveProps(nextProps) {
+				this.state = Object.assign({
+					content: ''
+				}, nextProps.post);
+			}
+		}, {
 			key: 'handleChange',
 			value: function handleChange(value) {
 				this.setState({
@@ -35863,6 +35887,8 @@
 		var action = arguments[1];
 
 		switch (action.type) {
+			case types.RECEIVE_CURRENT_POST:
+				return action.post;
 			default:
 				return state;
 		}

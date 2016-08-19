@@ -12,6 +12,12 @@ class Editor extends Component {
 		}, props.post)
 	}
 
+	componentWillReceiveProps(nextProps) {
+		this.state = Object.assign({
+			content: ''
+		}, nextProps.post)
+	}
+
 	handleChange(value) {
 		this.setState({
 			content: value

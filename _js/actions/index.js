@@ -1,6 +1,10 @@
 import * as types from '../constants/ActionTypes'
 import Database from '../database'
 
+export function receiveCurrentPost(post) {
+	return { type: types.RECEIVE_CURRENT_POST, post }
+}
+
 export function receiveLocalPost(post) {
 	return { type: types.RECEIVE_LOCAL_POST, post }
 }

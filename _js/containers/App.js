@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import classnames from 'classnames'
 import { connect } from 'react-redux'
 
-import { receiveLocalPost } from '../actions'
+import { receiveCurrentPost, receiveLocalPost } from '../actions'
 
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
@@ -13,8 +13,12 @@ class App extends Component {
 		super(props, context)
 	}
 
-	handleSelect() {
-
+	handleSelect(id) {
+		const { dispatch, posts } = this.props
+		let filterdPosts = posts.filter((item, index) => item.id == id)
+		if (filterdPosts.length > 0) {
+			dispatch(receiveCurrentPost(filterdPosts[0]))
+		}
 	}
 
 	handleAdd(post) {
@@ -31,7 +35,7 @@ class App extends Component {
 				<Sidebar posts={posts}
 					onSelect={this.handleSelect.bind(this)}
 					onAdd={this.handleAdd.bind(this)} />
-				<Editor currentPost={currentPost} />
+				<Editor post={currentPost} />
 			</div>
 		)
 	}
