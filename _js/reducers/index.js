@@ -9,7 +9,10 @@ const initialState = {
 function currentPost(state = initialState.currentPost, action) {
 	switch (action.type) {
 		case types.RECEIVE_CURRENT_POST:
+		case types.RECEIVE_LOCAL_POST:
 			return action.post
+		case types.REMOVE_LOCAL_POST:
+			return (state.id == action.id)? {} : state
 		default:
 			return state
 	}
@@ -21,6 +24,8 @@ function posts(state = initialState.posts, action) {
 			return action.posts
 		case types.RECEIVE_LOCAL_POST:
 			return state.concat([ action.post ])
+		case types.REMOVE_LOCAL_POST:
+			return state.filter(post => post.id != action.id)
 		default:
 			return state
 	}

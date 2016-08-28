@@ -1,45 +1,67 @@
 .sidebar {
 	& ul {
-		margin:0
-	}
-	& .item {
-		display:block;
-		padding:10px;
-		text-decoration:none;
-		color:#aaa;
-		cursor:pointer;
+		margin:0;
 
-		& .item_title {
-			display:block;
-			font-size:14px;
-		}
-		& .item_date {
-			display:block;
-			font-size:11px;
-		}
-		& .item_content {
-			display:block;
-			font-size:12px;
-		}
-		&:hover,
-		&.selected {
-			background:#263238;
-			color:#ccc;
-		}
-	}
+		& li {
+			position:relative;
 
-	& .btn_add {
-		display:block;
-		color:#aaa;
-		cursor:pointer;
-		font-size:12px;
-		text-align:center;
-		padding:10px;
-		text-decoration:none;
+			& .item {
+				position:relative;
+				display:block;
+				padding:10px;
+				text-decoration:none;
+				color:#aaa;
+				cursor:pointer;
 
-		&:hover {
-			background:#263238;
-			color:#ccc;
+				& .item_title {
+					display:block;
+					font-size:14px;
+				}
+				& .item_date {
+					display:block;
+					color:#999;
+					font-size:11px;
+				}
+				& .item_content {
+					display:block;
+					font-size:12px;
+				}
+				&:hover,
+				&.selected {
+					background:#263238;
+					color:#ccc;
+				}
+			}
+
+			& .btn_add {
+				display:block;
+				color:#aaa;
+				cursor:pointer;
+				font-size:12px;
+				text-align:center;
+				padding:10px;
+				text-decoration:none;
+
+				&:hover {
+					background:#263238;
+					color:#ccc;
+				}
+			}
+
+			& .btn_del {
+				position:absolute;
+				right:3px;
+				top:3px;
+				color:#ccc;
+				cursor:pointer;
+				border:0;
+				background:transparent;
+				display: none
+			}
+
+			&:hover .btn_del {
+				display: block
+			}
 		}
 	}
 }

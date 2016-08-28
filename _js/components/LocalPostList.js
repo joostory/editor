@@ -24,6 +24,17 @@ class LocalPostList extends Component {
 		this.setState({ selectedId: id })
 	}
 
+	handleDelete(e, id) {
+		const { posts, onRemove } = this.props
+		const { selectedId } = this.state
+
+		e.preventDefault()
+		Database.getInstance().removePost(id, () => onRemove(id))
+		if (id == selectedId) {
+			this.handleSelect(0)
+		}
+	}
+
 	render() {
 		const { posts } = this.props
 		const { selectedId } = this.state
@@ -36,10 +47,11 @@ class LocalPostList extends Component {
 			return (
 				<li key={item.id}>
 					<a className={className} onClick={e => this.handleSelect(item.id)}>
-						<span className="item_title">{item.title}</span>
 						<span className="item_date">{dateformat(item.date, 'yyyy/mm/dd HH:MM')}</span>
 						<span className="item_content">{item.content.substring(0,30)}</span>
 					</a>
+
+					<button className="btn_del" onClick={e => this.handleDelete(e, item.id)}>x</button>
 				</li>
 			)
 		})
@@ -56,7 +68,8 @@ class LocalPostList extends Component {
 LocalPostList.propTypes = {
 	posts: PropTypes.array.isRequired,
 	onSelect: PropTypes.func,
-	onAdd: PropTypes.func
+	onAdd: PropTypes.func,
+	onRemove: PropTypes.func
 }
 
 export default LocalPostList

@@ -4,13 +4,14 @@ import LocalPostList from './LocalPostList'
 
 class Sidebar extends Component {
 	render() {
-		const { posts, onSelect, onAdd } = this.props;
+		const { posts, onSelect, onAdd, onRemove } = this.props;
 
 		return (
 			<section className="sidebar">
 				<LocalPostList posts={posts}
 				 	onSelect={onSelect}
-					onAdd={onAdd} />
+					onAdd={onAdd}
+					onRemove={onRemove} />
 			</section>
 		)
 	}
@@ -19,7 +20,8 @@ class Sidebar extends Component {
 Sidebar.PropTypes = {
 	posts: PropTypes.array.isRequired,
 	onSelect: PropTypes.func,
-	onAdd: PropTypes.func
+	onAdd: PropTypes.func,
+	onRemove: PropTypes.func
 }
 
 export default Sidebar
