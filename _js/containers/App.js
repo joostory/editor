@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import classnames from 'classnames'
 import { connect } from 'react-redux'
 
-import { receiveCurrentPost, receiveLocalPost, removeLocalPost } from '../actions'
+import { receiveLocalPost, removeLocalPost, updateLocalPost } from '../actions'
 
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
@@ -11,13 +11,18 @@ import Editor from '../components/Editor'
 class App extends Component {
 	constructor(props, context) {
 		super(props, context)
+		this.state = {
+			currentPost: props.posts.length > 0? props.posts[0]:{}
+		}
 	}
 
 	handleSelect(id) {
 		const { dispatch, posts } = this.props
 		let filterdPosts = posts.filter((item, index) => item.id == id)
 		if (filterdPosts.length > 0) {
-			dispatch(receiveCurrentPost(filterdPosts[0]))
+			this.setState({
+				currentPost:filterdPosts[0]
+			})
 		}
 	}
 
@@ -31,8 +36,14 @@ class App extends Component {
 		dispatch(removeLocalPost(id))
 	}
 
+	handleUpdate(post) {
+		const { dispatch } = this.props
+		dispatch(updateLocalPost(post))
+	}
+
 	render() {
-		const { currentPost, posts } = this.props
+		const { posts } = this.props
+		const { currentPost } = this.state
 
 		return(
 			<div>
@@ -41,20 +52,18 @@ class App extends Component {
 					onSelect={this.handleSelect.bind(this)}
 					onAdd={this.handleAdd.bind(this)}
 					onRemove={this.handleRemove.bind(this)} />
-				<Editor post={currentPost} />
+				<Editor post={currentPost} onSave={this.handleUpdate.bind(this)} />
 			</div>
 		)
 	}
 }
 
 App.propTypes = {
-	currentPost: PropTypes.object.isRequired,
 	posts: PropTypes.array.isRequired
 }
 
 function mapStateToProps(state) {
   return {
-    currentPost: state.currentPost,
 		posts: state.posts
   }
 }
